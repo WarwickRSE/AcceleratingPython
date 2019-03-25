@@ -5,7 +5,8 @@ r_au = 1.0 # 1 AU
 
 import numpy as np
 import matplotlib.pyplot as plt
-import time
+from timeit import default_timer as timer
+import sys
 
 def pair_force(x1, x2, m1, m2):
 
@@ -41,12 +42,10 @@ def integrate(positions, velocities, masses, dt):
       vout[p1,:] = vprime[p1,:] + dt/2.0 * f/masses[p1]
 
     return pout, vout
-
 def run():
 
   global m_sol, m_earth, r_au
 
-  t0 =time.clock()
   mass = np.array([m_sol, 0.0553,0.815,1.0,0.11,317.8,95.2,14.6,17.2, 0.002]) * m_earth
   radii = np.array([0.0, 0.39, 0.723, 1.0, 1.524, 5.203, 9.539, 19.18, 30.06, 39.53]) * r_au
   nplanets = np.shape(mass)[0]
@@ -66,26 +65,16 @@ def run():
   dt = min_porb/10.0
   nits = int(np.ceil(max_porb/dt))
 
-  nits *= 100
-
   pin = np.zeros([nplanets,2, nits+1])
   vin = np.zeros([nplanets,2, nits+1])
 
   pin[:,0,0] = radii
   vin[:,1,0] = vorb
 
-  t1 = time.clock()
-
   for it in range(0, nits):
     pout, vout = integrate(pin[:,:,it], vin[:,:,it], mass, dt)
     pin[:,:,it+1] = pout
     vin[:,:,it+1] = vout
-
-  t2 = time.clock()
-
-  print('Setup time(ms) ' + str(int((t1-t0)*1000.0)))
-  print('Run time(ms) ' + str(int((t2-t1)*1000.0)))
-  print('Total time(ms) ' + str(int((t2-t0)*1000.0)))
 
   return pin, vin
 
@@ -111,3 +100,23 @@ def demo():
     axes.set_ylim([-40,40])
 
   plt.show()
+
+def main(demo_flag):
+
+  if (demo_flag):
+    demo()
+  else:
+    start = timer()
+    v=run()
+    end = timer()
+    print("Run took ", (end-start), " seconds")
+
+if __name__ == "__main__":
+
+  try:
+    demo_flag = sys.argv[1] == "demo"
+  except:
+    demo_flag = False
+
+  main(demo_flag)
+

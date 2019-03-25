@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 from ctypes import *
 from numba import jit
+from timeit import default_timer as timer
+import sys
 
 bigG = 1.0 #Just put G=1 for simplicity
 m_earth = 1.0 #Mass of earth in earth masses
@@ -16,12 +17,19 @@ res_cptr = res.ctypes.data_as(POINTER(c_double))
 def load_so():
     global so_fn
     so = CDLL('./pairforce.so')
-    so.pair_force.argtypes=[c_double, c_double, c_double, c_double, c_double, c_double, POINTER(c_double)]
-    so_fn = so.pair_force
+    so.pairforce.argtypes=[c_double, c_double, c_double, c_double, c_double, c_double, POINTER(c_double)]
+    so_fn = so.pairforce
+
+def pair_force_py(x1, x2, m1, m2):
+
+  global bigG, r_au
+  r = np.sqrt((x1[0]-x2[0])**2+(x1[1]-x2[1])**2) + 1.0e-9 * r_au
+  return -bigG * m1*m2*(x1-x2)/r**3
 
 def pair_force(x1, x2, m1, m2):
 
-    global so_fn, res
+    global so_fn, res, res_cptr
+
     dummy = so_fn(x1[0], x1[1], x2[0], x2[1], m1, m2, res_cptr)
     return res
 
@@ -61,7 +69,6 @@ def run():
 
   #Don't time the loading of the shared object
   load_so()
-  t0 =time.clock()
   mass = np.array([m_sol, 0.0553,0.815,1.0,0.11,317.8,95.2,14.6,17.2, 0.002]) * m_earth
   radii = np.array([0.0, 0.39, 0.723, 1.0, 1.524, 5.203, 9.539, 19.18, 30.06, 39.53]) * r_au
   nplanets = np.shape(mass)[0]
@@ -87,18 +94,10 @@ def run():
   pin[:,0,0] = radii
   vin[:,1,0] = vorb
 
-  t1 = time.clock()
-
   for it in range(0, nits):
     pout, vout = integrate(pin[:,:,it], vin[:,:,it], mass, dt)
     pin[:,:,it+1] = pout
     vin[:,:,it+1] = vout
-
-  t2 = time.clock()
-
-  print('Setup time(ms) ' + str(int((t1-t0)*1000.0)))
-  print('Run time(ms) ' + str(int((t2-t1)*1000.0)))
-  print('Total time(ms) ' + str(int((t2-t0)*1000.0)))
 
   return pin, vin
 
@@ -124,3 +123,23 @@ def demo():
     axes.set_ylim([-40,40])
 
   plt.show()
+
+def main(demo_flag):
+
+  if (demo_flag):
+    demo()
+  else:
+    start = timer()
+    v=run()
+    end = timer()
+    print("Run took ", (end-start), " seconds")
+
+if __name__ == "__main__":
+
+  try:
+    demo_flag = sys.argv[1].strip() == "demo"
+  except:
+    demo_flag = False
+
+  main(demo_flag)
+

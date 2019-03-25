@@ -15,8 +15,7 @@ PROGRAM Matrix_mult
   mat3 = 0.0_num
 
   CALL SYSTEM_CLOCK(start_time)
-  CALL DGEMM('n','n', nels, nels, nels, 1.0_num, mat1, nels, mat2, nels, &
-      0.0_num, mat3, nels)
+  mat3 = MATMUL(mat1, mat2)
   CALL SYSTEM_CLOCK(stop_time)
 
   PRINT *,'Time in ms ',stop_time-start_time

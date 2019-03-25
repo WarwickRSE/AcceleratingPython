@@ -1,11 +1,10 @@
 import numpy as np
 from timeit import default_timer as timer
 import sys
-from numba import jit, njit
 
-@njit
-def dot_py(A,B,C):
+def dot_py(A,B):
     n = A.shape[1]
+    C = np.zeros([n,n])
 
     for i in range(0,n):
         for j in range(0,n):
@@ -22,9 +21,7 @@ def gen_random_matrices(nels):
 
 def multiply_matrices(mat_tuple):
     start = timer()
-    n = mat_tuple[0].shape[1]
-    C = np.zeros([n,n])
-    val = dot_py(mat_tuple[0], mat_tuple[1],C)
+    val = dot_py(mat_tuple[0], mat_tuple[1])
     end = timer()
     print("Multiplying random matrices takes ", end-start, " seconds")
     return val

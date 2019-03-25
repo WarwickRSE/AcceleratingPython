@@ -3,7 +3,7 @@ from numpy import zeros, sum
 
 #Pick exactly one of this pair:
 #----------------------------------
-b = 1
+b = 0
 #Use jit on main loop
 if b == 1:
   print("Jitting main loop")
@@ -12,8 +12,8 @@ else:
 #Or don't
   print("Pure main loop")
   def jit(fn):
-    def wrapper(a, b):
-      fn(a, b)
+    def wrapper(*args):
+      return fn(*args)
     return wrapper
 #----------------------------------
 

@@ -90,10 +90,12 @@ if __name__ == "__main__":
   try:
     num_items = int(argv[1])
     num_high = int(argv[2])
+  except:
+    num_items = 100000
+    num_high = 1
+  try:
     num_iter = int(argv[3])
   except:
-    num_items = 10000
-    num_high = 10
     num_iter = 100
 
   print("Using ", num_items, num_high)

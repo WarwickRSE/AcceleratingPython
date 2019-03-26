@@ -62,7 +62,6 @@ def run():
       planets[p].vy[0] = vorb[p]
       planets[p].mass = mass[p]
 
-  #Don't time the loading of the shared object
   run_c(planets, nplanets, dt, nits)
 
   return nplanets, nits, planets

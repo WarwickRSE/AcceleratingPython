@@ -93,8 +93,6 @@ void run()
   dt = minporb/10.0;
   nits = (ceil(maxporb/dt));
 
-  nits *= 1000;
-
   for (p1 = 0; p1 < NPLANET; ++p1){
     planets[p1].x = malloc(sizeof(double) * (nits+1));
     planets[p1].y = malloc(sizeof(double) * (nits+1));

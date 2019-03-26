@@ -10,7 +10,6 @@ bigG = 1.0 #Just put G=1 for simplicity
 m_earth = 1.0 #Mass of earth in earth masses
 m_sol = 332946# Mass of sun in earth masses
 r_au = 1.0 # 1 AU
-so_fn = None
 
 class planet_c(Structure):
     _fields_ = [('x', POINTER(c_double)),
@@ -27,11 +26,10 @@ class planet_c(Structure):
 
 
 
-def load_so():
-    global so_fn
+def run_c(planets, nplanets, dt, nits):
     so = CDLL('./planets_lib.so')
     so.run.argtypes=[POINTER(planet_c), c_int, c_double, c_int]
-    so_fn = so.run
+    so.run(planets, nplanets, dt, nits)
 
 def run():
 
@@ -54,8 +52,8 @@ def run():
   dt = min_porb/10.0
   nits = int(np.ceil(max_porb/dt))
 
-  plist = [planet_c(nits+1) for x in range(10)]
-  planets = (planet_c*10)(*plist)
+  plist = [planet_c(nits+1) for x in range(nplanets)]
+  planets = (planet_c*nplanets)(*plist)
 
   for p in range(nplanets):
       planets[p].x[0] = radii[p]
@@ -65,18 +63,7 @@ def run():
       planets[p].mass = mass[p]
 
   #Don't time the loading of the shared object
-  load_so()
-  so_fn(planets, 10, dt, nits)
-
-  pout = np.zeros([10, 2, nits])
-  vout = np.zeros([10 ,2, nits])
-
-  for p in range(10):
-      for it in range(nits):
-          pout[p, 0, it] = planets[p].x[it]
-          pout[p, 1, it] = planets[p].y[it]
-          vout[p, 0, it] = planets[p].vx[it]
-          vout[p, 1, it] = planets[p].vy[it]
+  run_c(planets, nplanets, dt, nits)
 
   return nplanets, nits, planets
 

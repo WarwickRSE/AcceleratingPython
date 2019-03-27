@@ -1,12 +1,20 @@
 PROGRAM Matrix_mult
 
   INTEGER, PARAMETER :: num = KIND(1.D0)
-  INTEGER, PARAMETER :: nels = 5000
+  CHARACTER(LEN=32) :: arg
+  INTEGER :: nels = 5000
   REAL(num), DIMENSION(:,:), ALLOCATABLE :: mat1, mat2, mat3
   INTEGER :: start_time, stop_time
   INTEGER :: seed
 
+  IF (COMMAND_ARGUMENT_COUNT() == 1) THEN
+    CALL GET_COMMAND_ARGUMENT(1, arg)
+    READ(arg,*) nels
+  END IF
+
   seed = 10000
+
+  PRINT *, 'Multipliying ', nels, ' square matrices'
 
   ALLOCATE(mat1(nels, nels), mat2(nels,nels), mat3(nels, nels))
   CALL RANDOM_SEED(seed)

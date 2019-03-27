@@ -1,18 +1,24 @@
-
-
 PROGRAM main
 
   IMPLICIT NONE
 
+  CHARACTER(LEN=32) :: arg
   INTEGER :: i, j, k
-
+  INTEGER :: length = 5000
   DOUBLE PRECISION, DIMENSION(:,:), ALLOCATABLE :: A, B, C
   INTEGER :: seed, start_time, stop_time
-  INTEGER, PARAMETER :: length = 5000
+
+  IF (COMMAND_ARGUMENT_COUNT() == 1) THEN
+    CALL GET_COMMAND_ARGUMENT(1, arg)
+    READ(arg,*) length
+  END IF
 
   ALLOCATE(A(length,length), B(length, length), C(length, length))
 
-  seed = 13983
+  seed = 10000
+
+  PRINT *, 'Multipliying ', length, ' square matrices'
+
   CALL RANDOM_SEED(seed)
   CALL RANDOM_NUMBER(A)
   CALL RANDOM_NUMBER(B)

@@ -4,6 +4,11 @@ from math import sin, pi
 def calc_wave_amplitude(time, freq, phase):
 
   return sin(2.0*pi*freq*time + phase)
+#Two named functions to keep profiling separate
+def calc_wave_amplitude_copy(time, freq, phase):
+
+  return sin(2.0*pi*freq*time + phase)
+
 
 def simple_calc_w_temporaries(frequencies, phases, amplitudes, axis, wave):
 
@@ -11,7 +16,7 @@ def simple_calc_w_temporaries(frequencies, phases, amplitudes, axis, wave):
   for i in range(0,len(frequencies)):
     print(frequencies[i], phases[i])
     for j in range(0,len(axis)):
-      wave_temp[j] = calc_wave_amplitude(axis[j], frequencies[i], phases[i])
+      wave_temp[j] = calc_wave_amplitude_copy(axis[j], frequencies[i], phases[i])
     wave = wave + amplitudes[i]*wave_temp
 
 def simple_calc(frequencies, phases, amplitudes, axis, wave):

@@ -2,7 +2,23 @@
 import numpy as np
 from sys import argv
 import time
-from numba import jit
+
+# This lets us turn on or off jit (just-in time compilation)
+# using a single variable rather than having to adjust inside the code
+use_jit = False
+if use_jit == True:
+  #Use jit on core
+  print("Jitting core function")
+  from numba import jit
+else:
+  #Or don't
+  print("No jitting")
+  #Create dummy function instead
+  def jit(fn):
+    def wrapper(*args):
+      return fn(*args)
+    return wrapper
+#----------------------------------
 
 def create_two_valued_array(n_items, n_high):
 

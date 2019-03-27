@@ -2,6 +2,7 @@
 from math import sin, pi
 import numpy as np
 import time
+from numba import vectorize, float64
 
 sin_v = np.vectorize(sin)
 
@@ -11,12 +12,16 @@ def calc_wave_amplitude(time, freq, phase):
 
 calc_wave_amplitude_v = np.vectorize(calc_wave_amplitude, excluded =[2, 3])
 
+@vectorize([float64(float64, float64, float64)])
+def calc_wave_amplitude_numb(time, freq, phase):
+
+  return sin(2.0*pi*freq*time + phase)
+
 def calc_wave_arg(time, freq, phase):
 
   return 2.0*pi*freq*time + phase
 
 def simple_calc(frequencies, phases, amplitudes, axis, wave):
-
   for i in range(0,len(frequencies)):
     print(frequencies[i], phases[i])
     wave = wave + (amplitudes[i] * calc_wave_amplitude_v(axis, frequencies[i], phases[i]))
@@ -30,6 +35,16 @@ def better_calc(frequencies, phases, amplitudes, axis, wave):
   for i in range(0,len(frequencies)):
     print(frequencies[i], phases[i])
     wave = wave + (amplitudes[i] * np.sin(calc_wave_arg(axis, frequencies[i], phases[i])))
+
+def better_calc_vec(frequencies, phases, amplitudes, axis, wave):
+#In this version, even if we change how we combine the parts
+#of the argument, we still have a function doing it
+#But we're taking full advantage of array ops
+
+  for i in range(0,len(frequencies)):
+    print(frequencies[i], phases[i])
+    wave = wave + (amplitudes[i] * calc_wave_amplitude_numb(axis, frequencies[i], phases[i]))
+
 
 def non_future_proofed_calc(frequencies, phases, amplitudes, axis, wave):
 #Here we embed the "sin" call right into our code, meaning if the details change
@@ -58,9 +73,19 @@ def main():
   axis = np.arange(ax_len)*100
 
   start = time.time()
+  simple_calc(frequencies, phases, amplitudes, axis, wave)
+  end = time.time()
+  print("Attempted vectorisation took ", end-start, "s")
+
+  start = time.time()
   non_future_proofed_calc(frequencies, phases, amplitudes, axis, wave)
   end = time.time()
-  print("Vectorized sin took ", end-start, "s")
+  print("Numpy vectorized sin took ", end-start, "s")
+
+  start = time.time()
+  better_calc_vec(frequencies, phases, amplitudes, axis, wave)
+  end = time.time()
+  print("Numba vectorized amplitude took ", end-start, "s")
 
   start = time.time()
   non_future_proofed_calc_a(frequencies, phases, amplitudes, axis, wave)
@@ -68,18 +93,12 @@ def main():
   print("Numpy sin took ", end-start, "s")
 
   start = time.time()
-  simple_calc(frequencies, phases, amplitudes, axis, wave)
-  end = time.time()
-  print("Attempted vectorisation took ", end-start, "s")
-
-  start = time.time()
   better_calc(frequencies, phases, amplitudes, axis, wave)
   end = time.time()
   print("Array ops took ", end-start, "s")
 
-
 if __name__== "__main__":
 
   import cProfile as prof
-
-  prof.run("main()")
+  main()
+#  prof.run("main()")

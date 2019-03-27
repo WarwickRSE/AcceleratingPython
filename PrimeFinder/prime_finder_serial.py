@@ -3,7 +3,7 @@ from numpy import zeros, sum
 
 #Pick exactly one of this pair:
 #----------------------------------
-b = 0
+b = 1
 #Use jit on main loop
 if b == 1:
   print("Jitting main loop")
@@ -33,20 +33,24 @@ elif a == 1:
 elif a == 2:
   #Off loading heavy functions to C
   from c_call_example.functions import check_prime
+else:
+  raise(ValueError("Option "+str(a)+" not understood"))
 
 import time
 
 primes = []
 
 @jit
+def main_loop(lower, length, flags):
+  for i in range(1, length):
+    flags[i] = check_prime(lower+i)
+
 def main_serial(lower, upper):
 
   length = upper - lower
   flags = zeros(length)
-  #Offset of last dispatched value
   start_time = time.time()
-  for i in range(1, length):
-    flags[i] = check_prime(lower+i)
+  main_loop(lower, length, flags)
   end_time = time.time()
   print("Found ", int(sum(flags)), " primes in", end_time-start_time, ' s')
 

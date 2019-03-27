@@ -10,21 +10,18 @@ import numpy
 from time import time
 
 check_prime = None
-
 primes_in_range = None
 
 def load_so():
-    global primes_in_range
+    global primes_in_range, check_prime
 
     so = CDLL('./c_library/functions_O.so')
     so.primes_in_range.argtypes=[c_long, c_long]
     so.primes_in_range.restype =c_long
     primes_in_range = so.primes_in_range
 
-
-    so = CDLL('./c_library/functions_O.so')
-    so.check_prime.argtypes=[c_long, c_long]
-    so.check_prime.restype =c_long
+    so.check_prime.argtypes=[c_long]
+    so.check_prime.restype =c_byte
     check_prime = so.check_prime
 
 print("Using C functions")

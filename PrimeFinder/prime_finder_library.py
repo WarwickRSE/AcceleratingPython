@@ -1,5 +1,6 @@
 from sys import argv
 from numpy import zeros, sum
+from numba import jit
 
 from c_library.functions import check_prime, primes_in_range
 

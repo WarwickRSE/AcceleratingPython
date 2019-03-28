@@ -69,7 +69,7 @@ def main():
   amplitudes = np.array([1, 1, 1, 1])
 
   ax_len = 100000
-  wave = np.array(ax_len)
+  wave = np.zeros(ax_len)
   axis = np.arange(ax_len)*100
 
   start = time.time()
